@@ -27,7 +27,7 @@ class Example(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
         #u转换为unicode编码
-        self.Version = u"YEDDA-V1.0 标注工具"
+        self.Version = u"SmartNote-V1.0 标注工具-文本对比"
         self.OS = platform.system().lower()
         self.parent = parent
         self.fileName = ""
@@ -108,18 +108,21 @@ class Example(Frame):
         self.columnconfigure(self.textColumn+2, weight=4)
         self.columnconfigure(self.textColumn, weight=4)
         self.columnconfigure(self.textColumn+4, weight=4)
-        for idx in range(0,16):
+        for idx in range(1,16):
             self.rowconfigure(idx, weight =1)
         
         self.lbl = Label(self, text=u"文件：没有打开的文件")
         #“文件标签lb1”左右留5距离，上下留4距离，左对齐
-        self.lbl.grid(sticky=W, pady=4, padx=5)
+        self.lbl.grid(row = 0, column = 0, sticky=W, pady=4, padx=5)
+        self.lb2 = Label(self, text=u"文件：没有打开的文件")
+        #“文件标签lb1”左右留5距离，上下留4距离，左对齐
+        self.lb2.grid(row = 0, column = 2,sticky=W, pady=4, padx=5)
         #定义字体fnt
         self.fnt = tkFont.Font(family=self.textFontStyle,size=self.textRow,weight="bold",underline=0)
-        self.text = Text(self, font=self.fnt, selectbackground=self.selectColor)
-        self.text.grid(row=1, column=0, columnspan=1, rowspan=self.textRow, padx=4)
-        self.text2 = Text(self, font=self.fnt, selectbackground=self.selectColor)
-        self.text2.grid(row=1, column=2, columnspan=1, rowspan=self.textRow, padx=4)
+        self.text = Text(self, font=self.fnt, selectbackground=self.selectColor, background ='lightgreen')
+        self.text.grid(row=1, column=0, columnspan=1, rowspan=self.textRow, padx=4, pady =20,sticky= W+N+S)
+        self.text2 = Text(self, font=self.fnt, selectbackground=self.selectColor, background = 'moccasin')
+        self.text2.grid(row=1, column=2, columnspan=1, rowspan=self.textRow, padx=4, pady =20,sticky= W+N+S)
 
         self.sb = Scrollbar(self)
         self.sb.grid(row = 1, column = 0, rowspan = self.textRow, padx=0, sticky= N+S+E)
@@ -131,7 +134,10 @@ class Example(Frame):
         self.sb2['command'] = self.text2.yview 
         # self.sb.pack()
         ubtn = Button(self, text="ReMap", command=self.renewPressCommand)
-        ubtn.grid(row=10, column=self.textColumn + 3, columnspan = 3,pady=1, padx = 3,sticky = W+E+N+S)
+        ubtn.grid(row=10, column=self.textColumn + 3, pady=1, padx = 3,sticky = W)
+        
+        ubtn = Button(self, text="NewMap", command=self.savenewPressCommand)
+        ubtn.grid(row=10, column=11, padx=3, pady=1,sticky = W)
 
         cbtn = Button(self, text="Compare",command = self.compareTwoText)
         cbtn.grid(row=11, column=self.textColumn + 3, columnspan = 3,pady=1, padx = 3,sticky = W+E+N+S)
@@ -142,15 +148,15 @@ class Example(Frame):
         abtn2 = Button(self, text="Open2", command=self.onOpen_C)
         abtn2.grid(row=12, column=11, padx= 3,pady= 1,sticky = W)
 
-        exportbtn = Button(self, text="Export1", command=self.generateSequenceFile)
-        exportbtn.grid(row=13, column=self.textColumn + 3, pady=1, sticky = W) 
+        exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
+        exportbtn.grid(row=13, column=self.textColumn + 3, columnspan = 4, pady=1,  padx = 3,sticky = W+E+N+S) 
 
-        exportbtn2 = Button(self, text="Export2", command=self.generateSequenceFile)
-        exportbtn2.grid(row=13, column=11, pady=1, sticky = W)      
+        #exportbtn2 = Button(self, text="Export2", command=self.generateSequenceFile)
+        #exportbtn2.grid(row=13, column=11, pady=1, sticky = W)      
 
         dbtn = Button(self, text="Continue1", command=self.onOpen2)
         dbtn.grid(row=14, column=self.textColumn +3, sticky = W)
-        dbtn2 = Button(self, text="Continue2", command=self.onOpen2)
+        dbtn2 = Button(self, text="Continue2", command=self.onOpen2_C)
         dbtn2.grid(row=14, column=11, sticky = W)
 
         
@@ -192,7 +198,7 @@ class Example(Frame):
         cursor_index = self.text.index(INSERT) 
         row_column = cursor_index.split('.')
         cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
-        self.cursorIndex.config(text=cursor_text)
+        #self.cursorIndex.config(text=cursor_text)
     
     def doubleLeftClick(self, event):
         """双击鼠标左键，选择实体 (TODO 还没有实现)"""
@@ -267,8 +273,8 @@ class Example(Frame):
             (filename1, extension) = os.path.splitext(tempfilename)
             innerCharacter = ''.join(re.findall(r'[A-Za-z]', filename1))
             innerNumber = ''.join(re.findall(r'\d+',filename1))
-            f2 = filepath +'/' + innerCharacter + str(int(innerNumber)+1) + extension
-            print(f2)
+            f2 = filepath +'/' + innerCharacter[0:-3] + str(int(innerNumber)+1) +'.txt' +extension
+            #print(f2)
             if f2 != '':
                 self.text.delete("1.0",END)
                 text = self.readFile(f2)
@@ -282,23 +288,51 @@ class Example(Frame):
         except AttributeError:
             tkMessageBox.showerror(u"继续打开文件错误!", '请先在文件夹中打开一个文件')
         except FileNotFoundError:
-            f2 = filepath +'/' + innerCharacter + str(int(innerNumber)+1) + extension
+            f2 = filepath +'/' + innerCharacter[0:-3] + str(int(innerNumber)+1)+'.txt' + extension
             self.fileName = f2
-            print('except:'+self.fileName)
+            #print('except:'+self.fileName)
             tkMessageBox.showerror(u"继续打开文件错误!", '文件不存在！请继续打开文件或重新选择')
-
+    
+    def onOpen2_C (self):
+        """打开文件"""
+        try:
+            (filepath,tempfilename) = os.path.split(self.fileName_C)
+            (filename1, extension) = os.path.splitext(tempfilename)
+            innerCharacter = ''.join(re.findall(r'[A-Za-z]', filename1))
+            innerNumber = ''.join(re.findall(r'\d+',filename1))
+            f2 = filepath +'/' + innerCharacter[0:-3] + str(int(innerNumber)+1) +'.txt'+ extension
+            #print(f2)
+            if f2 != '':
+                self.text2.delete("1.0",END)
+                text = self.readFile_C(f2)
+                self.text2.insert(END, text)
+                self.setNameLabel_C("File: " + f2)
+                self.autoLoadNewFile_C(self.fileName_C, "1.0")
+                # self.setDisplay()
+                # self.initAnnotate()
+                self.text2.mark_set(INSERT, "1.0")
+                self.setCursorLabel(self.text2.index(INSERT))
+        except AttributeError:
+            tkMessageBox.showerror(u"继续打开文件错误!", '请先在文件夹中打开一个文件')
+        except FileNotFoundError:
+            f2 = filepath +'/' + innerCharacter[0:-3] + str(int(innerNumber)+1) +'.txt'+ extension
+            self.fileName_C = f2
+            #print('except:'+self.fileName_C)
+            tkMessageBox.showerror(u"继续打开文件错误!", '文件不存在！请继续打开文件或重新选择')
 
     def readFile(self, filename):
         """读文件"""
         with codecs.open(filename, "rU", encoding='utf-8') as f:
-            text = f.read()
+            textori = f.read()
+            text = re.sub(r'\$','@',textori)
             self.fileName = filename
             return text
 
     def readFile_C(self, filename):
         """读文件"""
         with codecs.open(filename, "rU", encoding='utf-8') as f:
-            text = f.read()
+            textori = f.read()
+            text = re.sub(r'\$','@',textori)
             self.fileName_C = filename
             return text
 
@@ -313,6 +347,9 @@ class Example(Frame):
     
     def setNameLabel(self, new_file):
         self.lbl.config(text=new_file)
+
+    def setNameLabel_C(self, new_file):
+        self.lb2.config(text=new_file)
 
     def setCursorLabel(self, cursor_index):
         if self.debug:
@@ -377,7 +414,7 @@ class Example(Frame):
     def clearCommand(self):
         if self.debug:
             print("Action Track: clearCommand")
-        self.entry.delete(0, 'end')
+        #self.entry.delete(0, 'end')
 
     def getText(self):
         textContent = self.text.get("1.0","end-1c")
@@ -580,7 +617,7 @@ class Example(Frame):
             self.text2.delete("1.0",END)
             text = self.readFile_C(fileName)
             self.text2.insert("end-1c", text)
-            #self.setNameLabel("File: " + fileName)
+            self.setNameLabel_C("File: " + fileName)
             self.text2.mark_set(INSERT, newcursor_index)
             self.text2.see(newcursor_index)
             self.setCursorLabel(newcursor_index)
@@ -595,6 +632,7 @@ class Example(Frame):
         currentCursor = self.text.index(INSERT)
         lineStart = currentCursor.split('.')[0] + '.0'
         lineEnd = currentCursor.split('.')[0] + '.end'
+        commandList = []
          
         if self.colorAllChunk:
             for flag in list('abcdefgh'):
@@ -629,8 +667,10 @@ class Example(Frame):
                 
                 exist= False
                 comString = self.text.get(first_pos, last_pos)
-                commandList = list('abcdefgh')
-                commandList.remove(key) 
+                for charc in self.pressCommand:
+                    commandList.append(charc)
+                commandList.remove(key)
+                commandList.sort()
                 for e in commandList:
                     containing = re.search(self.pressCommand[e]+ r'\*\]',comString) 
                     if containing != None:
@@ -638,9 +678,11 @@ class Example(Frame):
                         break
                 if exist:
                     self.text.mark_set("matchEnd"+key, "%s+%sc" % (pos, str(1)))
+                    commandList.clear()
                     continue
 
                 self.text.tag_add("catagory"+key, first_pos, last_pos)
+                commandList.clear()
                    
          
         ## color recommend type
@@ -685,6 +727,7 @@ class Example(Frame):
         currentCursor = self.text2.index(INSERT)
         lineStart = currentCursor.split('.')[0] + '.0'
         lineEnd = currentCursor.split('.')[0] + '.end'
+        commandList = []
          
         if self.colorAllChunk:
             for flag in list('abcdefgh'):
@@ -719,8 +762,10 @@ class Example(Frame):
                 
                 exist= False
                 comString = self.text2.get(first_pos, last_pos)
-                commandList = list('abcdefgh')
-                commandList.remove(key) 
+                for charc in self.pressCommand:
+                    commandList.append(charc)
+                commandList.remove(key)
+                commandList.sort() 
                 for e in commandList:
                     containing = re.search(self.pressCommand[e]+ r'\*\]',comString) 
                     if containing != None:
@@ -728,9 +773,11 @@ class Example(Frame):
                         break
                 if exist:
                     self.text2.mark_set("matchEnd"+key, "%s+%sc" % (pos, str(1)))
+                    commandList.clear()
                     continue
 
                 self.text2.tag_add("catagory"+key, first_pos, last_pos)
+                commandList.clear()
                    
          
         ## color recommend type
@@ -781,6 +828,7 @@ class Example(Frame):
         lineStart2 = currentCursor.split('.')[0] + '.0'
         lineEnd = currentCursor.split('.')[0] + '.end'
         lineEnd2 = currentCursor.split('.')[0] + '.end'
+        commandList = []
          
         if self.colorAllChunk:
             for flag in list('abcdefgh'):
@@ -805,8 +853,8 @@ class Example(Frame):
         for key in self.pressCommand:
             while True:
                 pattern = r'\[\@.*?\#' + self.pressCommand[key] + r'\*\](?!\#)'
-                self.text.tag_configure("same"+key, background= 'green')
-                self.text2.tag_configure("same"+key, background= 'green')
+                self.text.tag_configure("same"+key, background= 'lightgray')
+                self.text2.tag_configure("same"+key, background= 'lightgray')
                 self.text.tag_configure("different"+key, background= 'red')
                 self.text2.tag_configure("different"+key, background= 'red')
                 pos = self.text.search(pattern, "matchEnd"+key, "searchLimit"+key,  count=countVar, regexp=True)
@@ -826,8 +874,10 @@ class Example(Frame):
                 exist= False
                 comString = self.text.get(first_pos, last_pos)
                 comString2 = self.text2.get(first_pos2, last_pos2)
-                commandList = list('abcdefgh')
-                commandList.remove(key) 
+                for charc in self.pressCommand:
+                    commandList.append(charc)
+                commandList.remove(key)
+                commandList.sort() 
                 for e in commandList:
                     containing = re.search(self.pressCommand[e]+ r'\*\]',comString)
                     containing2 = re.search(self.pressCommand[e]+ r'\*\]',comString2) 
@@ -837,13 +887,16 @@ class Example(Frame):
                 if exist:
                     self.text.mark_set("matchEnd"+key, "%s+%sc" % (pos, str(1)))
                     self.text2.mark_set("matchEnd"+key, "%s+%sc" % (pos2, str(1)))
+                    commandList.clear()
                     continue
                 if first_pos == first_pos2 and last_pos == last_pos2 :
                     self.text.tag_add("same"+key, first_pos, last_pos)
                     self.text2.tag_add("same"+key, first_pos2, last_pos2)
+                    commandList.clear()
                 else:
                     self.text.tag_add('different'+key,first_pos, last_pos)
                     self.text2.tag_add('different'+key,first_pos2, last_pos2)
+                    commandList.clear()
 
                                
         
@@ -914,37 +967,37 @@ class Example(Frame):
         tkMessageBox.showinfo("Remap Notification", u"快捷方式已更新！\n\n配置文件保存在：" + self.configFile)
 
 ## save as new shortcut map
-    # def savenewPressCommand(self):
-    #     if self.debug:
-    #         print("Action Track: savenewPressCommand")
-    #     seq = 0
-    #     new_dict = {}
-    #     listLength = len(self.labelEntryList)
-    #     delete_num = 0
-    #     for key in sorted(self.pressCommand):
-    #         label = self.labelEntryList[seq].get()
-    #         if len(label) > 0:
-    #             new_dict[key] = label
-    #         else:
-    #             delete_num += 1
-    #         seq += 1
-    #     self.pressCommand = new_dict
-    #     for idx in range(1, delete_num+1):
-    #         self.labelEntryList[listLength-idx].delete(0,END)
-    #         self.shortcutLabelList[listLength-idx].config(text="NON= ")
-    #     # prompt to ask configFile name
-    #     self.configFile = tkFileDialog.asksaveasfilename(initialdir="./configs/",
-    #                                                      title="Save New Config",
-    #                                                      filetypes=(("YEDDA configs", "*.config"), ("all files", "*.*")))
-    #     # change to relative path following self.init()
-    #     self.configFile = os.path.relpath(self.configFile)
-    #     # make sure ending with ".config"
-    #     if not self.configFile.endswith(".config"):
-    #         self.configFile += ".config"
-    #     with open(self.configFile, 'wb') as fp:
-    #         pickle.dump(self.pressCommand, fp)
-    #     self.setMapShow()
-    #     tkMessageBox.showinfo("Save New Map Notification", "Shortcut map has been saved and updated!\n\nConfigure file has been saved in File:" + self.configFile)
+    def savenewPressCommand(self):
+        if self.debug:
+            print("Action Track: savenewPressCommand")
+        seq = 0
+        new_dict = {}
+        listLength = len(self.labelEntryList)
+        delete_num = 0
+        for key in sorted(self.pressCommand):
+            label = self.labelEntryList[seq].get()
+            if len(label) > 0:
+                new_dict[key] = label
+            else:
+                delete_num += 1
+            seq += 1
+        self.pressCommand = new_dict
+        for idx in range(1, delete_num+1):
+            self.labelEntryList[listLength-idx].delete(0,END)
+            self.shortcutLabelList[listLength-idx].config(text="NON= ")
+         # prompt to ask configFile name
+        self.configFile = tkFileDialog.asksaveasfilename(initialdir="./configs/",
+                                                         title="Save New Config",
+                                                         filetypes=(("YEDDA configs", "*.config"), ("all files", "*.*")))
+         # change to relative path following self.init()
+        self.configFile = os.path.relpath(self.configFile)
+         # make sure ending with ".config"
+        if not self.configFile.endswith(".config"):
+            self.configFile += ".config"
+        with open(self.configFile, 'wb') as fp:
+            pickle.dump(self.pressCommand, fp)
+        self.setMapShow()
+        tkMessageBox.showinfo("Save New Map Notification", "Shortcut map has been saved and updated!\n\nConfigure file has been saved in File:" + self.configFile)
 
 
     def setMapShow(self):
@@ -986,10 +1039,10 @@ class Example(Frame):
             self.configListLabel.destroy()
         if self.configListBox is not None:
             self.configListBox.destroy()
-        self.configListLabel = Label(self, text="Map Templates", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-        self.configListLabel.grid(row=row + 1, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=10)
+        #self.configListLabel = Label(self, text="Map Templates", foreground="blue", font=(self.textFontStyle, 14, "bold"))
+        #self.configListLabel.grid(row=row + 1, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=10)
         self.configListBox = Combobox(self, values=getConfigList(), state='readonly')
-        self.configListBox.grid(row=row + 2, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=1)
+        self.configListBox.grid(row=row + 1, column=self.textColumn + 3, columnspan=3, rowspan=1, padx=1)
         # select current config file
         self.configListBox.set(self.configFile.split(os.sep)[-1])
         self.configListBox.bind('<<ComboboxSelected>>', self.on_select)
@@ -1188,7 +1241,7 @@ def decompositCommand(command_string):
     
 
 def main():
-    print(u"启动 YEDDA 标注工具！")
+    print(u"启动 SmartNote 标注工具！")
     print((u"操作系统：%s")%(platform.system()))
     root = Tk()
     #界面大小，及初始位置（左，上）

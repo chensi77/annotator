@@ -566,6 +566,7 @@ class Example(Frame):
         currentCursor = self.text.index(INSERT)
         lineStart = currentCursor.split('.')[0] + '.0'
         lineEnd = currentCursor.split('.')[0] + '.end'
+        commandList = []
          
         if self.colorAllChunk:
             for flag in list('abcdefgh'):
@@ -587,33 +588,36 @@ class Example(Frame):
         #为标签设置颜色
         for key in self.pressCommand:
             while True:
-                try:
-                    pattern = r'\[\@.*?\#' + self.pressCommand[key] + r'\*\](?!\#)'
-                    self.text.tag_configure("catagory"+key, background=self.labelEntryColor[key])
-                    pos = self.text.search(pattern, "matchEnd"+key, "searchLimit"+key,  count=countVar, regexp=True)
-                    if pos =="":
-                        break
-                    self.text.mark_set("matchStart"+key, pos)
-                    self.text.mark_set("matchEnd"+key, "%s+%sc" % (pos, countVar.get()))
+                pattern = r'\[\@.*?\#' + self.pressCommand[key] + r'\*\](?!\#)'
+                self.text.tag_configure("catagory"+key, background=self.labelEntryColor[key])
+                pos = self.text.search(pattern, "matchEnd"+key, "searchLimit"+key,  count=countVar, regexp=True)
+                if pos =="":
+                    break
+                self.text.mark_set("matchStart"+key, pos)
+                self.text.mark_set("matchEnd"+key, "%s+%sc" % (pos, countVar.get()))
                         
-                    first_pos = pos
-                    last_pos = "%s + %sc" %(pos, str(int(countVar.get())))
+                first_pos = pos
+                last_pos = "%s + %sc" %(pos, str(int(countVar.get())))
                     
-                    exist= False
-                    comString = self.text.get(first_pos, last_pos)
-                    commandList = list('abcdefgh')
-                    commandList.remove(key) 
-                    for e in commandList:
-                        containing = re.search(self.pressCommand[e]+ r'\*\]',comString) 
-                        if containing != None:
-                            exist = True
-                            break
-                    if exist:
-                        self.text.mark_set("matchEnd"+key, "%s+%sc" % (pos, str(1)))
-                        continue
-                    self.text.tag_add("catagory"+key, first_pos, last_pos)
-                except KeyError:
+                exist= False
+                comString = self.text.get(first_pos, last_pos)
+                for charc in self.pressCommand:
+                    commandList.append(charc)
+                commandList.remove(key)
+                commandList.sort()
+                #print(commandList[0:len(commandList)]) 
+                for e in commandList:
+                    containing = re.search(self.pressCommand[e]+ r'\*\]',comString) 
+                    if containing != None:
+                        exist = True
+                        break
+                if exist:
+                    self.text.mark_set("matchEnd"+key, "%s+%sc" % (pos, str(1)))
+                    commandList.clear()
                     continue
+                self.text.tag_add("catagory"+key, first_pos, last_pos)
+                commandList.clear()
+                
                    
          
         ## color recommend type

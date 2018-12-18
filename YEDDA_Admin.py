@@ -16,7 +16,9 @@ import re
 from collections import deque
 import pickle
 import os.path
+import os
 import platform
+
 
 from utils.recommend import *
 from utils.metric4ann import *
@@ -26,7 +28,7 @@ from utils.compareAnn import *
 class Example(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
-        self.Version = u"YEDDA-V1.0 管理员"
+        self.Version = u"SmartNote-V1.0 主菜单"
         self.OS = platform.system().lower()
         self.parent = parent
         self.fileName = ""
@@ -44,6 +46,12 @@ class Example(Frame):
                 self.columnconfigure(idx, weight =10)
             else:
                 self.columnconfigure(idx, weight =1)
+        for idy in range(0,4):
+            if idx == 0:
+                self.rowconfigure(idy, weight =1)
+            else:
+                self.rowconfigure(idy, weight =1)
+
         # for idx in range(0,2):
         #     self.rowconfigure(idx, weight =1)
         the_font=('TkDefaultFont', 18, )
@@ -52,14 +60,17 @@ class Example(Frame):
 
         width_size = 30
 
-        abtn = Button(self, text=u"多标注分析", command=self.multiFiles, width = width_size)
-        abtn.grid(row=0, column=1)
+        recButton = Button(self, text=u"开始单人标注", command=self.startAnnotate,  width = width_size)
+        recButton.grid(row=0, column=1, padx = 5,sticky = W+E+S+N)
 
-        recButton = Button(self, text=u"配对比较", command=self.compareTwoFiles,  width = width_size)
-        recButton.grid(row=1, column=1)
+        recButton = Button(self, text=u"标注结果对比", command=self.compareTwoFiles,  width = width_size)
+        recButton.grid(row=1, column=1, padx = 5,sticky = W+E+S+N)
+
+        abtn = Button(self, text=u"多标注分析", command=self.multiFiles, width = width_size)
+        abtn.grid(row=2, column=1, padx = 5,sticky = W+E+S+N)
 
         cbtn = Button(self, text=u"退出", command=self.quit, width = width_size)
-        cbtn.grid(row=2, column=1)
+        cbtn.grid(row=3, column=1, padx = 5,sticky = W+E+S+N)
 
     def ChildWindow(self, input_list, result_matrix):
         file_list = []
@@ -125,28 +136,20 @@ class Example(Frame):
             result_matrix =  generate_report_from_list(filez)
             self.ChildWindow(filez, result_matrix)
 
+
+    def startAnnotate(self):
+        os.system('python YEDDA_Annotator.py')
+
+
     def compareTwoFiles(self):
-        ftypes = [('ann files', '.ann')]
-        filez = tkFileDialog.askopenfilenames(parent=self.parent, filetypes = ftypes, title=u'选择文件')
-        if len(filez) != 2:
-            tkMessageBox.showinfo(u"比较错误", u"请选择 2 个文件！")
-        else:
-            f = tkFileDialog.asksaveasfile(mode='w', defaultextension=".tex")
-            write_result = compareBoundary(filez[0],filez[1],f)
-            if write_result:
-                tkMessageBox.showinfo(u"生成 Latex", u"成功生成 Latex 文件！\n保存到 "+ f.name)
-                # import os
-                # os.system("pdflatex "+ f.name)
-            else:
-                tkMessageBox.showinfo(u"Latex 错误", u"生成 Latex 错误：2 个文件的句子数不相等！")
-            f.close()
+        os.system('python Compare.py')
 
 
 def main():
-    print(u"启动 YEDDA 管理员程序！")
+    print(u"启动 SmartNote 主界面！")
     print((u"操作系统：%s")%(platform.system()))
     root = Tk()
-    root.geometry("400x100")
+    root.geometry("500x200")
     app = Example(root)
     
     root.mainloop()

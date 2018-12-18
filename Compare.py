@@ -219,20 +219,7 @@ class Example(Frame):
         except TclError:
             pass
 
-    # def setInRecommendModel(self):
-    #     """开启推荐标注模式"""
-    #     self.recommendFlag = True
-    #     self.RecommendModelFlag.config(text = str(self.recommendFlag))
-    #     tkMessageBox.showinfo("Recommend Model", "Recommend Model has been activated!")
 
-    # def setInNotRecommendModel(self):
-    #     """关闭推荐标注模式"""
-    #     self.recommendFlag = False 
-    #     self.RecommendModelFlag.config(text = str(self.recommendFlag))
-    #     content = self.getText()
-    #     content = removeRecommendContent(content,self.recommendRe)
-    #     self.writeFile(self.fileName, content, '1.0')
-    #     tkMessageBox.showinfo("Recommend Model", "Recommend Model has been deactivated!")
 
     def onOpen(self):
         """打开文件"""
@@ -1241,7 +1228,7 @@ def decompositCommand(command_string):
     
 
 def main():
-    print(u"启动 SmartNote 标注工具！")
+    print(u"启动 SmartNote 文本对比！")
     print((u"操作系统：%s")%(platform.system()))
     root = Tk()
     #界面大小，及初始位置（左，上）

@@ -27,7 +27,7 @@ class Example(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
         #u转换为unicode编码
-        self.Version = u"YEDDA-V1.0 标注工具"
+        self.Version = u"SmartNote-V1.0 标注工具-单人标注"
         self.OS = platform.system().lower()
         self.parent = parent
         self.fileName = ""
@@ -975,7 +975,7 @@ def decompositCommand(command_string):
 	
 
 def main():
-    print(u"启动 YEDDA 标注工具！")
+    print(u"启动 SmartNote 标注工具！")
     print((u"操作系统：%s")%(platform.system()))
     root = Tk()
     #界面大小，及初始位置（左，上）

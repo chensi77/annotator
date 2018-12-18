@@ -979,7 +979,11 @@ def main():
     print((u"操作系统：%s")%(platform.system()))
     root = Tk()
     #界面大小，及初始位置（左，上）
-    root.geometry("1300x700+0+0")
+    ws = root.winfo_screenwidth()
+    hs = root.winfo_screenheight()
+    x = (ws/2) - (1300/2)
+    y = (hs/2) - (700/2)
+    root.geometry("1300x700+%d+%d" % (x, y))
     app = Example(root)
     #跳转到自定义函数设置字体大小
     app.setFont(17)

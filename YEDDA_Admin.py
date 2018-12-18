@@ -22,7 +22,7 @@ import platform
 
 from utils.recommend import *
 from utils.metric4ann import *
-from utils.compareAnn import *
+
 
 
 class Example(Frame):
@@ -149,7 +149,11 @@ def main():
     print(u"启动 SmartNote 主界面！")
     print((u"操作系统：%s")%(platform.system()))
     root = Tk()
-    root.geometry("500x200")
+    ws = root.winfo_screenwidth()
+    hs = root.winfo_screenheight()
+    x = (ws/2) - (500/2)
+    y = (hs/2) - (200/2)
+    root.geometry("500x200+%d+%d" % (x, y))
     app = Example(root)
     
     root.mainloop()
